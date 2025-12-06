@@ -1,39 +1,4 @@
-#include <stdio.h>
-#include <string.h>
 
-// Define a struct
-struct Student {
-    char name[50];
-    int age;
-    float marks;
-};
-
-int main() {
-    // Create variables of type struct Student
-    struct Student s1, s2;
-
-    // Assign values
-    strcpy(s1.name, "Basant");
-    s1.age = 20;
-    s1.marks = 88.5;
-
-    strcpy(s2.name, "Prakash");
-    s2.age = 21;
-    s2.marks = 92.0;
-
-    // Print header
-    printf("+----------------+-----+-------+\n");
-    printf("| Name           | Age | Marks |\n");
-    printf("+----------------+-----+-------+\n");
-
-    // Print data
-    printf("| %-14s | %3d | %5.2f |\n", s1.name, s1.age, s1.marks);
-    printf("| %-14s | %3d | %5.2f |\n", s2.name, s2.age, s2.marks);
-
-    printf("+----------------+-----+-------+\n");
-
-    return 0;
-}
 
 
 
