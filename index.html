@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Simple Calculator</title>
+  <style>
+    body{font-family:Arial;display:flex;min-height:100vh;align-items:center;justify-content:center;background:#f3f7fb}
+    .calc{background:white;padding:18px;border-radius:10px;box-shadow:0 6px 18px rgba(20,30,60,0.08);width:300px}
+    input{width:100%;padding:10px;font-size:18px;margin-bottom:10px;border:1px solid #ddd;border-radius:6px}
+    .row{display:flex;gap:8px}
+    button{flex:1;padding:10px;border-radius:6px;border:0;font-weight:600;cursor:pointer}
+    .op{background:#1976d2;color:white}
+    .eq{background:#2e7d32;color:white;flex:2}
+    .clear{background:#e0e0e0}
+  </style>
+</head>
+<body>
+  <div class="calc">
+    <input id="display" type="text" placeholder="Enter expression" />
+    <div class="row">
+      <button onclick="press('7')">7</button>
+      <button onclick="press('8')">8</button>
+      <button onclick="press('9')">9</button>
+      <button class="op" onclick="press('/')">÷</button>
+    </div>
+    <div class="row">
+      <button onclick="press('4')">4</button>
+      <button onclick="press('5')">5</button>
+      <button onclick="press('6')">6</button>
+      <button class="op" onclick="press('*')">×</button>
+    </div>
+    <div class="row">
+      <button onclick="press('1')">1</button>
+      <button onclick="press('2')">2</button>
+      <button onclick="press('3')">3</button>
+      <button class="op" onclick="press('-')">−</button>
+    </div>
+    <div class="row">
+      <button onclick="press('0')">0</button>
+      <button onclick="press('.')">.</button>
+      <button class="eq" onclick="evaluateExpr()">=</button>
+      <button class="op" onclick="press('+')">+</button>
+    </div>
+    <div class="row" style="margin-top:8px">
+      <button class="clear" onclick="clearDisplay()">Clear</button>
+      <button class="clear" onclick="backspace()">⌫</button>
+    </div>
+  </div>
+
+  <script>
+    const d = document.getElementById('display');
+    function press(s){ d.value += s; d.focus(); }
+    function clearDisplay(){ d.value = ''; d.focus(); }
+    function backspace(){ d.value = d.value.slice(0, -1); d.focus(); }
+    function evaluateExpr(){
+      try{
+        if (/^[0-9+\-*/().\s]+$/.test(d.value.trim())){
+          d.value = String(eval(d.value));
+        } else {
+          alert('Invalid characters.');
+        }
+      } catch(e){
+        alert('Error in expression');
+      }
+      d.focus();
+    }
+  </script>
+</body>
+</html>
