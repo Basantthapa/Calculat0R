@@ -1,120 +1,199 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <title>Animated Calculator</title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      height: 100vh;
-      background-color: #f0f4f8;
-    }
-    .calculator {
-      border: 2px solid #3498db;
-      padding: 20px;
-      border-radius: 15px;
-      background-color: #fff;
-      box-shadow: 0 5px 15px rgba(0,0,0,0.1);
-    }
-    #display {
-      width: 230px;
-      height: 50px;
-      margin-bottom: 10px;
-      text-align: right;
-      font-size: 24px;
-      padding: 10px;
-      border-radius: 5px;
-      border: 1px solid #ccc;
-      transition: all 0.3s ease;
-    }
-    button {
-      width: 50px;
-      height: 50px;
-      margin: 5px;
-      font-size: 18px;
-      border-radius: 8px;
-      border: none;
-      cursor: pointer;
-      transition: all 0.2s;
-      background-color: #3498db;
-      color: white;
-    }
-    button:hover {
-      transform: scale(1.1);
-      background-color: #2980b9;
-    }
-    .operator {
-      background-color: #e67e22;
-    }
-    .operator:hover {
-      background-color: #d35400;
-    }
-    @keyframes shake {
-      0% { transform: translateX(0); }
-      25% { transform: translateX(-5px); }
-      50% { transform: translateX(5px); }
-      75% { transform: translateX(-5px); }
-      100% { transform: translateX(0); }
-    }
-    .shake {
-      animation: shake 0.3s;
-    }
-  </style>
+<meta charset="UTF-8">
+<title>Fun Animated Calculator</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@500&display=swap');
+
+  body {
+    font-family: 'Orbitron', sans-serif;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    background: linear-gradient(120deg, #89f7fe, #66a6ff);
+    margin: 0;
+    overflow: hidden;
+  }
+
+  .calculator {
+    background: #1e1e2f;
+    padding: 30px;
+    border-radius: 20px;
+    box-shadow: 0 15px 30px rgba(0,0,0,0.4);
+    text-align: center;
+    width: 260px;
+  }
+
+  #display {
+    width: 100%;
+    height: 60px;
+    margin-bottom: 15px;
+    font-size: 28px;
+    border-radius: 10px;
+    border: none;
+    padding: 10px;
+    text-align: right;
+    background: #2e2e3e;
+    color: #fff;
+    box-shadow: inset 0 0 10px rgba(0,0,0,0.5);
+    transition: all 0.3s ease;
+  }
+
+  button {
+    width: 55px;
+    height: 55px;
+    margin: 5px;
+    font-size: 20px;
+    font-weight: bold;
+    border-radius: 12px;
+    border: none;
+    cursor: pointer;
+    color: #fff;
+    background: linear-gradient(145deg, #ff7f50, #ff6347);
+    box-shadow: 0 5px #c7543f;
+    transition: all 0.2s;
+    position: relative;
+    overflow: hidden;
+  }
+
+  button:hover {
+    transform: scale(1.1) rotate(-2deg);
+    box-shadow: 0 8px #c7543f;
+  }
+
+  .operator {
+    background: linear-gradient(145deg, #fdbb2d, #ff6f3c);
+    box-shadow: 0 5px #c46e25;
+  }
+
+  .operator:hover {
+    transform: scale(1.1) rotate(2deg);
+    box-shadow: 0 8px #c46e25;
+  }
+
+  @keyframes shake {
+    0% { transform: translateX(0); }
+    25% { transform: translateX(-5px); }
+    50% { transform: translateX(5px); }
+    75% { transform: translateX(-5px); }
+    100% { transform: translateX(0); }
+  }
+
+  .shake {
+    animation: shake 0.4s;
+  }
+
+  /* Ripple effect */
+  .ripple {
+    position: absolute;
+    border-radius: 50%;
+    transform: scale(0);
+    animation: ripple 0.6s linear;
+    background: rgba(255,255,255,0.7);
+  }
+
+  @keyframes ripple {
+    to { transform: scale(4); opacity: 0; }
+  }
+</style>
 </head>
 <body>
-  <div class="calculator">
-    <input type="text" id="display" disabled>
-    <br>
-    <button onclick="press('1')">1</button>
-    <button onclick="press('2')">2</button>
-    <button onclick="press('3')">3</button>
-    <button class="operator" onclick="press('+')">+</button>
-    <br>
-    <button onclick="press('4')">4</button>
-    <button onclick="press('5')">5</button>
-    <button onclick="press('6')">6</button>
-    <button class="operator" onclick="press('-')">-</button>
-    <br>
-    <button onclick="press('7')">7</button>
-    <button onclick="press('8')">8</button>
-    <button onclick="press('9')">9</button>
-    <button class="operator" onclick="press('*')">*</button>
-    <br>
-    <button onclick="press('0')">0</button>
-    <button onclick="clearDisplay()">C</button>
-    <button onclick="calculate()">=</button>
-    <button class="operator" onclick="press('/')">/</button>
-  </div>
 
-  <script>
-    function press(num) {
-      const display = document.getElementById("display");
-      display.value += num;
-      display.style.opacity = 0;
-      setTimeout(() => display.style.opacity = 1, 50);
-    }
+<div class="calculator">
+  <input type="text" id="display" disabled>
+  <br>
+  <button onclick="press('1')">1</button>
+  <button onclick="press('2')">2</button>
+  <button onclick="press('3')">3</button>
+  <button class="operator" onclick="press('+')">+</button>
+  <br>
+  <button onclick="press('4')">4</button>
+  <button onclick="press('5')">5</button>
+  <button onclick="press('6')">6</button>
+  <button class="operator" onclick="press('-')">-</button>
+  <br>
+  <button onclick="press('7')">7</button>
+  <button onclick="press('8')">8</button>
+  <button onclick="press('9')">9</button>
+  <button class="operator" onclick="press('*')">*</button>
+  <br>
+  <button onclick="press('0')">0</button>
+  <button onclick="clearDisplay()">C</button>
+  <button onclick="calculate()">=</button>
+  <button class="operator" onclick="press('/')">/</button>
+</div>
 
-    function clearDisplay() {
-      const display = document.getElementById("display");
-      display.value = '';
-      display.style.opacity = 0;
-      setTimeout(() => display.style.opacity = 1, 50);
-    }
+<script>
+const display = document.getElementById("display");
 
-    function calculate() {
-      const display = document.getElementById("display");
-      try {
-        display.value = eval(display.value);
-      } catch {
-        display.value = 'Error';
-        display.classList.add('shake');
-        setTimeout(() => display.classList.remove('shake'), 300);
+// Button press animation
+function press(num) {
+  display.value += num;
+  animateDisplay();
+  createRipple(event);
+}
+
+function clearDisplay() {
+  display.value = '';
+  animateDisplay();
+}
+
+function calculate() {
+  try {
+    display.value = eval(display.value);
+    animateDisplay();
+    createConfetti();
+  } catch {
+    display.value = 'Error';
+    display.classList.add('shake');
+    setTimeout(() => display.classList.remove('shake'), 400);
+  }
+}
+
+// Display fade animation
+function animateDisplay() {
+  display.style.opacity = 0;
+  setTimeout(() => display.style.opacity = 1, 50);
+}
+
+// Ripple effect
+function createRipple(e) {
+  const button = e.target;
+  const circle = document.createElement('span');
+  circle.classList.add('ripple');
+  circle.style.left = `${e.offsetX}px`;
+  circle.style.top = `${e.offsetY}px`;
+  button.appendChild(circle);
+  setTimeout(() => button.removeChild(circle), 600);
+}
+
+// Confetti effect
+function createConfetti() {
+  for (let i=0;i<30;i++){
+    const confetti = document.createElement('div');
+    confetti.style.position = 'fixed';
+    confetti.style.width = '10px';
+    confetti.style.height = '10px';
+    confetti.style.backgroundColor = `hsl(${Math.random()*360}, 100%, 50%)`;
+    confetti.style.left = `${Math.random()*100}vw`;
+    confetti.style.top = `0`;
+    confetti.style.borderRadius = '50%';
+    confetti.style.zIndex = 9999;
+    document.body.appendChild(confetti);
+    let fall = setInterval(()=>{
+      confetti.style.top = parseFloat(confetti.style.top)+5+'px';
+      if(parseFloat(confetti.style.top)>window.innerHeight){
+        clearInterval(fall);
+        document.body.removeChild(confetti);
       }
-    }
-  </script>
+    },16);
+  }
+}
+</script>
 </body>
 </html>
+
 
 
