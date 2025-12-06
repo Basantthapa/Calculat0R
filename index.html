@@ -2,121 +2,208 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Catch the Stars Game</title>
+<title>Ultimate Neon Racing Game</title>
 <style>
   body {
     margin: 0;
     overflow: hidden;
+    background: linear-gradient(to bottom, #0f0c29, #302b63, #24243e);
     font-family: 'Arial', sans-serif;
-    background: linear-gradient(to bottom, #1e3c72, #2a5298);
   }
-  #gameContainer {
+  #game {
     position: relative;
-    width: 100vw;
-    height: 100vh;
+    width: 500px;
+    height: 700px;
+    margin: 20px auto;
+    border: 4px solid #0ff;
+    border-radius: 15px;
+    background: #111;
     overflow: hidden;
+    box-shadow: 0 0 30px #0ff;
   }
-  .star {
+  .road-line {
     position: absolute;
-    width: 40px;
-    height: 40px;
-    background: yellow;
-    border-radius: 50%;
-    box-shadow: 0 0 10px #fff;
-    cursor: pointer;
-    animation: fall linear;
+    width: 10px;
+    height: 60px;
+    background: #0ff;
+    left: 50%;
+    margin-left: -5px;
+    opacity: 0.6;
   }
-  @keyframes fall {
-    from { top: -50px; }
-    to { top: 100vh; }
+  .player {
+    position: absolute;
+    width: 50px;
+    height: 100px;
+    background: red;
+    bottom: 30px;
+    left: 225px;
+    border-radius: 15px;
+    box-shadow: 0 0 20px yellow, 0 0 40px orange;
+    transition: left 0.1s;
+  }
+  .enemy {
+    position: absolute;
+    width: 50px;
+    height: 100px;
+    background: blue;
+    border-radius: 15px;
+    box-shadow: 0 0 20px cyan, 0 0 40px #0ff;
   }
   #score {
-    position: fixed;
+    position: absolute;
     top: 10px;
     left: 10px;
+    color: yellow;
     font-size: 28px;
-    color: white;
-    text-shadow: 0 0 5px #000;
+    text-shadow: 0 0 10px #fff;
+    z-index: 10;
   }
-  #missed {
-    position: fixed;
-    top: 10px;
-    right: 10px;
-    font-size: 28px;
-    color: red;
-    text-shadow: 0 0 5px #000;
+  @keyframes shake {
+    0% { transform: translateX(0); }
+    25% { transform: translateX(-8px); }
+    50% { transform: translateX(8px); }
+    75% { transform: translateX(-8px); }
+    100% { transform: translateX(0); }
+  }
+  .shake { animation: shake 0.5s; }
+
+  .particle {
+    position: absolute;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: yellow;
+    pointer-events: none;
+    box-shadow: 0 0 10px #fff;
   }
 </style>
 </head>
 <body>
-<div id="gameContainer"></div>
-<div id="score">Score: 0</div>
-<div id="missed">Missed: 0</div>
+<div id="game">
+  <div id="score">Score: 0</div>
+  <div class="player" id="player"></div>
+</div>
 
 <script>
+const game = document.getElementById('game');
+const player = document.getElementById('player');
+const gameWidth = 500;
+const gameHeight = 700;
+let playerX = 225;
+let keys = {};
+let speed = 6;
 let score = 0;
-let missed = 0;
-const maxMissed = 5;
-const gameContainer = document.getElementById('gameContainer');
+let gameOver = false;
+let enemies = [];
+let roadLines = [];
 
-function createStar() {
-  const star = document.createElement('div');
-  star.classList.add('star');
-  star.style.left = Math.random() * (window.innerWidth - 40) + 'px';
-  star.style.animationDuration = (3 + Math.random()*2) + 's';
-  gameContainer.appendChild(star);
-
-  star.addEventListener('click', () => {
-    score++;
-    document.getElementById('score').innerText = 'Score: ' + score;
-    star.remove();
-    createConfetti(star.style.left, star.style.top);
-  });
-
-  star.addEventListener('animationend', () => {
-    if(gameContainer.contains(star)) {
-      missed++;
-      document.getElementById('missed').innerText = 'Missed: ' + missed;
-      star.remove();
-      if(missed >= maxMissed) alert('Game Over! Score: ' + score);
-    }
-  });
+// Create road lines
+for(let i=0;i<15;i++){
+  const line = document.createElement('div');
+  line.classList.add('road-line');
+  line.style.top = i*50 + 'px';
+  game.appendChild(line);
+  roadLines.push(line);
 }
 
-// Create confetti for fun
-function createConfetti(x, y) {
-  for(let i=0; i<10; i++) {
-    const confetti = document.createElement('div');
-    confetti.style.position = 'absolute';
-    confetti.style.width = '6px';
-    confetti.style.height = '6px';
-    confetti.style.background = `hsl(${Math.random()*360}, 100%, 50%)`;
-    confetti.style.left = x;
-    confetti.style.top = y;
-    confetti.style.borderRadius = '50%';
-    gameContainer.appendChild(confetti);
+// Player controls
+document.addEventListener('keydown', e=>keys[e.key]=true);
+document.addEventListener('keyup', e=>keys[e.key]=false);
 
+// Create enemies
+function createEnemy(){
+  const enemy = document.createElement('div');
+  enemy.classList.add('enemy');
+  enemy.style.left = Math.floor(Math.random()*8)*50 + 'px';
+  enemy.style.top = '-120px';
+  game.appendChild(enemy);
+  enemies.push(enemy);
+}
+
+// Collision detection
+function checkCollision(player, enemy){
+  const px = playerX;
+  const py = parseInt(player.style.bottom);
+  const ex = parseInt(enemy.style.left);
+  const ey = parseInt(enemy.style.top);
+  return !(px+50 < ex || px > ex+50 || 0+py > ey+100 || 0+py+100 < ey);
+}
+
+// Particle explosion
+function createParticles(x, y){
+  for(let i=0;i<20;i++){
+    const p = document.createElement('div');
+    p.classList.add('particle');
+    p.style.left = x + 'px';
+    p.style.top = y + 'px';
+    p.style.background = `hsl(${Math.random()*360},100%,50%)`;
+    game.appendChild(p);
     let dx = (Math.random()-0.5)*10;
-    let dy = (Math.random()-1)*10;
+    let dy = (Math.random()-0.5)*10;
     let life = 0;
-
-    const interval = setInterval(() => {
+    const interval = setInterval(()=>{
       life++;
-      confetti.style.left = parseFloat(confetti.style.left) + dx + 'px';
-      confetti.style.top = parseFloat(confetti.style.top) + dy + 'px';
-      if(life > 20) {
-        confetti.remove();
+      p.style.left = parseFloat(p.style.left)+dx+'px';
+      p.style.top = parseFloat(p.style.top)+dy+'px';
+      if(life>25){
+        p.remove();
         clearInterval(interval);
       }
-    }, 30);
+    },16);
   }
 }
 
-// Spawn stars every 800ms
-setInterval(createStar, 800);
+// Animate game
+function animate(){
+  if(gameOver) return;
+
+  // Move road lines
+  roadLines.forEach(line=>{
+    let top = parseInt(line.style.top);
+    top += speed;
+    if(top>gameHeight) top = -60;
+    line.style.top = top+'px';
+  });
+
+  // Move player
+  if(keys['ArrowLeft'] && playerX>0) playerX -= 8;
+  if(keys['ArrowRight'] && playerX<gameWidth-50) playerX += 8;
+  player.style.left = playerX+'px';
+
+  // Move enemies
+  enemies.forEach((enemy,index)=>{
+    let top = parseInt(enemy.style.top);
+    top += speed;
+    enemy.style.top = top+'px';
+
+    if(checkCollision(player, enemy)){
+      player.classList.add('shake');
+      createParticles(playerX, gameHeight-150);
+      gameOver = true;
+      setTimeout(()=>alert('GAME OVER! Score: '+score),100);
+    }
+
+    if(top>gameHeight){
+      enemy.remove();
+      enemies.splice(index,1);
+      score++;
+      document.getElementById('score').innerText = 'Score: '+score;
+      if(score%5===0) speed+=1; // Increase speed
+    }
+  });
+
+  // Spawn enemies randomly
+  if(Math.random()<0.03) createEnemy();
+
+  requestAnimationFrame(animate);
+}
+
+// Start the game
+animate();
 </script>
 </body>
 </html>
+
 
 
 
