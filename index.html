@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<title>Neon Energy Ring – Hand Controlled</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+<script src="https://unpkg.com/three@0.160.0/build/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@mediapipe/hands/hands.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js"></script>
+
+<style>
+body { margin:0; overflow:hidden; background:radial-gradient(circle at center, #050016, #000); }
+#cam {
+  position:fixed; top:12px; right:12px;
+  width:180px; height:130px;
+  border-radius:12px; overflow:hidden;
+  border:2px solid rgba(180,120,255,0.5);
+  box-shadow:0 0 25px rgba(180,120,255,0.6);
+}
+#cam video { width:100%; height:100%; object-fit:cover; transform:scaleX(-1); }
+#hint {
+  position:fixed; bottom:14px; left:50%; transform:translateX(-50%);
+  color:#cbb3ff; font-family:system-ui; font-size:14px;
+}
+</style>
+</head>
+<body>
+
+<div id="cam"><video id="video" autoplay playsinline muted></video></div>
+<div id="hint">Click once • Move hand left/right • Open hand = energy expand</div>
+
+<script>
+// ============================
+// SCENE
+// ============================
+const scene = new THREE.Scene();
+const camera = new THREE.PerspectiveCamera(70, innerWidth/innerHeight, 0.1, 100);
+camera.position.z = 4;
+
+const renderer = new THREE.WebGLRenderer({ antialias:true });
+renderer.setSize(innerWidth, innerHeight);
+renderer.setPixelRatio(devicePixelRatio);
+document.body.appendChild(renderer.domElement);
+
+// ============================
+// GEOMETRY (ENERGY RING)
+// ============================
+const geo = new THREE.TorusGeometry(1.2, 0.35, 64, 256);
+
+const mat = new THREE.ShaderMaterial({
+  uniforms:{
+    time:{ value:0 },
+    power:{ value:1.0 },
+    spin:{ value:0.0 }
+  },
+  vertexShader:`
+    varying vec2 vUv;
+    uniform float spin;
+    void main(){
+      vUv = uv;
+      vec3 p = position;
+      p.xz *= mat2(cos(spin), -sin(spin), sin(spin), cos(spin));
+      gl_Position = projectionMatrix * modelViewMatrix * vec4(p,1.0);
+    }
+  `,
+  fragmentShader:`
+    precision highp float;
+    varying vec2 vUv;
+    uniform float time;
+    uniform float power;
+
+    void main(){
+      float glow = sin(vUv.x * 12.0 + time * 4.0) * 0.5 + 0.5;
+      vec3 color = vec3(
+        0.7 + 0.3 * sin(time),
+        0.4 + 0.6 * glow,
+        1.0
+      );
+      gl_FragColor = vec4(color * power, glow);
+    }
+  `,
+  transparent:true,
+  blending:THREE.AdditiveBlending
+});
+
+const ring = new THREE.Mesh(geo, mat);
+scene.add(ring);
+
+// ============================
+// HAND TRACKING (ROBUST)
+// ============================
+let targetPower = 1.0;
+let targetSpin = 0.0;
+
+const hands = new Hands({ locateFile:f=>`https://cdn.jsdelivr.net/npm/@mediapipe/hands/${f}` });
+hands.setOptions({ maxNumHands:1, modelComplexity:1, minDetectionConfidence:0.7, minTrackingConfidence:0.7 });
+
+hands.onResults(res=>{
+  if (!res.multiHandLandmarks || res.multiHandLandmarks.length === 0) return;
+
+  const lm = res.multiHandLandmarks[0];
+
+  // Use palm X movement (very reliable)
+  targetSpin = (lm[9].x - 0.5) * 4.0;
+
+  // Hand openness (distance wrist -> middle finger)
+  const open = Math.hypot(lm[0].x - lm[12].x, lm[0].y - lm[12].y);
+  targetPower = THREE.MathUtils.clamp(open * 3.0, 0.6, 2.2);
+});
+
+// ============================
+// CAMERA START (SAFE)
+// ============================
+const video = document.getElementById('video');
+let cam = null;
+
+async function startCam(){
+  if (cam) return;
+  cam = new Camera(video,{
+    onFrame: async()=> video.readyState>=2 && hands.send({ image: video }),
+    width:640, height:480
+  });
+  cam.start();
+}
+
+addEventListener('click', startCam, { once:true });
+
+// ============================
+// ANIMATE
+// ============================
+function animate(t){
+  requestAnimationFrame(animate);
+
+  mat.uniforms.time.value = t * 0.001;
+  mat.uniforms.spin.value += (targetSpin - mat.uniforms.spin.value) * 0.1;
+  mat.uniforms.power.value += (targetPower - mat.uniforms.power.value) * 0.1;
+
+  ring.rotation.y += 0.003;
+
+  renderer.render(scene, camera);
+}
+
+animate();
+
+addEventListener('resize', ()=>{
+  camera.aspect = innerWidth/innerHeight;
+  camera.updateProjectionMatrix();
+  renderer.setSize(innerWidth, innerHeight);
+});
+</script>
+</body>
+</html>
