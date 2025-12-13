@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>3D Interactive Particle System</title>
+<title>3D Interactive Particle Vortex</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <script src="https://unpkg.com/three@0.160.0/build/three.min.js"></script>
@@ -19,16 +19,17 @@ body { margin: 0; overflow: hidden; background: #000; }
 <body>
 
 <div id="cam"><video id="video" autoplay playsinline muted></video></div>
-<div id="hint">Click once • Move hand to rotate/tilt • Pinch to scale • Open hand to expand • Two hands to change shape</div>
+<div id="hint">Click once • Move hand to rotate/tilt • Pinch to scale • Open hand to expand • Two hands to change shape • Move hand near vortex center for gravity effect</div>
 
 <script>
 // ===================
 // THREE.JS SETUP
 // ===================
 const scene = new THREE.Scene();
-scene.fog = new THREE.Fog(0x000000, 5, 25);
+scene.fog = new THREE.Fog(0x000000, 5, 30);
 const camera = new THREE.PerspectiveCamera(65, window.innerWidth / window.innerHeight, 0.1, 100);
-camera.position.z = 12;
+camera.position.z = 15;
+
 const renderer = new THREE.WebGLRenderer({ antialias: true });
 renderer.setSize(window.innerWidth, window.innerHeight);
 document.body.appendChild(renderer.domElement);
@@ -36,8 +37,9 @@ document.body.appendChild(renderer.domElement);
 // ===================
 // PARTICLES
 // ===================
-const COUNT = 15000;
+const COUNT = 20000;
 const positions = new Float32Array(COUNT * 3);
+const velocities = new Float32Array(COUNT * 3);
 const colors = new Float32Array(COUNT * 3);
 
 const geometry = new THREE.BufferGeometry();
@@ -48,69 +50,57 @@ const material = new THREE.PointsMaterial({ size: 0.05, vertexColors: true, tran
 const particles = new THREE.Points(geometry, material);
 scene.add(particles);
 
+// Initialize random positions and velocities
+for(let i=0;i<COUNT;i++){
+  positions[i*3] = (Math.random()-0.5)*20;
+  positions[i*3+1] = (Math.random()-0.5)*20;
+  positions[i*3+2] = (Math.random()-0.5)*20;
+  velocities[i*3] = (Math.random()-0.5)*0.02;
+  velocities[i*3+1] = (Math.random()-0.5)*0.02;
+  velocities[i*3+2] = (Math.random()-0.5)*0.02;
+  colors[i*3] = Math.random();
+  colors[i*3+1] = Math.random();
+  colors[i*3+2] = 1;
+}
+geometry.attributes.position.needsUpdate = true;
+geometry.attributes.color.needsUpdate = true;
+
 // ===================
 // SHAPE TEMPLATES
 // ===================
 let templateIndex = 0;
-const templates = {
-  sphere: i => {
-    const phi = Math.acos(2 * Math.random() - 1);
-    const theta = Math.random() * 2 * Math.PI;
-    const r = 5 * Math.cbrt(Math.random());
-    return [r * Math.sin(phi) * Math.cos(theta), r * Math.sin(phi) * Math.sin(theta), r * Math.cos(phi)];
-  },
-  heart: i => {
-    const t = Math.random() * Math.PI * 2;
-    const r = Math.sqrt(Math.random());
-    const x = 16 * Math.pow(Math.sin(t), 3);
-    const y = 13 * Math.cos(t) - 5 * Math.cos(2*t) - 2 * Math.cos(3*t) - Math.cos(4*t);
-    return [x*0.05*r, y*0.05*r, (Math.random()-0.5)];
-  },
-  ring: i => {
-    const angle = Math.random() * 2 * Math.PI;
-    const radius = 4 + Math.random()*1;
-    return [Math.cos(angle)*radius, (Math.random()-0.5)*1.5, Math.sin(angle)*radius];
-  },
-  fireworks: i => {
-    const v = new THREE.Vector3().randomDirection().multiplyScalar(Math.random()*3);
-    return [v.x, v.y, v.z];
-  }
-};
-const templateKeys = Object.keys(templates);
+const templateKeys = ['sphere','heart','ring','fireworks'];
 
-function applyTemplate() {
-  for(let i=0;i<COUNT;i++){
-    const [x,y,z] = templates[templateKeys[templateIndex]](i);
-    positions[i*3] = x; positions[i*3+1] = y; positions[i*3+2] = z;
-    colors[i*3] = Math.random(); colors[i*3+1] = Math.random(); colors[i*3+2] = 1;
-  }
-  geometry.attributes.position.needsUpdate = true;
-  geometry.attributes.color.needsUpdate = true;
+function applyTemplate(){
+  // Optional: reset particle positions per template
 }
-applyTemplate();
 
 // ===================
 // HAND TRACKING
 // ===================
-let scale = 1, colorShift = 0, lastHands = 0;
-let rotationX = 0, rotationY = 0;
+let scale = 1, rotationX = 0, rotationY = 0, colorShift = 0, lastHands=0;
+let vortexCenter = new THREE.Vector3(0,0,0);
 
-const hands = new Hands({ locateFile: f=>`https://cdn.jsdelivr.net/npm/@mediapipe/hands/${f}` });
+const hands = new Hands({ locateFile:f=>`https://cdn.jsdelivr.net/npm/@mediapipe/hands/${f}` });
 hands.setOptions({ maxNumHands: 2, modelComplexity:1, minDetectionConfidence:0.7, minTrackingConfidence:0.7 });
 
 hands.onResults(results => {
   const count = results.multiHandLandmarks?.length || 0;
   if(count>=1){
     const lm = results.multiHandLandmarks[0];
-    // Rotate/tilt
+    // Rotate/tilt system
     rotationY = (lm[0].x-0.5)*Math.PI*2;
     rotationX = (lm[0].y-0.5)*Math.PI;
-    // Scale via pinch distance
+    // Scale via pinch
     const d = Math.hypot(lm[4].x-lm[8].x, lm[4].y-lm[8].y);
-    scale = THREE.MathUtils.clamp(d*8, 0.5, 3);
-    // Color shift via open hand distance
+    scale = THREE.MathUtils.clamp(d*8,0.5,3);
+    // Color shift
     const open = Math.hypot(lm[0].x-lm[12].x, lm[0].y-lm[12].y);
     colorShift = open*5;
+    // Vortex center in 3D (normalized screen to world)
+    vortexCenter.x = (lm[0].x-0.5)*20;
+    vortexCenter.y = -(lm[0].y-0.5)*20;
+    vortexCenter.z = 0;
   }
   if(count===2 && lastHands!==2){
     templateIndex = (templateIndex+1)%templateKeys.length;
@@ -136,17 +126,43 @@ addEventListener('click', startCamera, {once:true});
 // ===================
 function animate(){
   requestAnimationFrame(animate);
+
+  // Rotate system
   particles.rotation.x += (rotationX-particles.rotation.x)*0.05;
   particles.rotation.y += (rotationY-particles.rotation.y)*0.05;
   particles.scale.setScalar(scale);
-  const c = geometry.attributes.color.array;
-  for(let i=0;i<c.length;i+=3){ c[i]=0.5+0.5*Math.sin(performance.now()*0.002+colorShift); }
+
+  // Update particle positions with vortex attraction
+  for(let i=0;i<COUNT;i++){
+    let dx = vortexCenter.x-positions[i*3];
+    let dy = vortexCenter.y-positions[i*3+1];
+    let dz = vortexCenter.z-positions[i*3+2];
+    let dist = Math.sqrt(dx*dx+dy*dy+dz*dz)+0.001;
+    let force = 0.02 / dist;
+    velocities[i*3] += dx*force;
+    velocities[i*3+1] += dy*force;
+    velocities[i*3+2] += dz*force;
+
+    positions[i*3] += velocities[i*3];
+    positions[i*3+1] += velocities[i*3+1];
+    positions[i*3+2] += velocities[i*3+2];
+
+    // Some damping to prevent runaway
+    velocities[i*3]*=0.95; velocities[i*3+1]*=0.95; velocities[i*3+2]*=0.95;
+
+    // Color dynamic
+    colors[i*3] = 0.5+0.5*Math.sin(performance.now()*0.002+colorShift);
+  }
+
+  geometry.attributes.position.needsUpdate=true;
   geometry.attributes.color.needsUpdate=true;
+
   renderer.render(scene,camera);
 }
 animate();
 
-window.addEventListener('resize',()=>{ camera.aspect=window.innerWidth/window.innerHeight; camera.updateProjectionMatrix(); renderer.setSize(window.innerWidth, window.innerHeight); });
+window.addEventListener('resize',()=>{ camera.aspect=innerWidth/window.innerHeight; camera.updateProjectionMatrix(); renderer.setSize(innerWidth, innerHeight); });
 </script>
 </body>
 </html>
+
