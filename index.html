@@ -2,8 +2,8 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>3D Interactive Particle Vortex</title>
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>3D Interactive Particle Vortex (Mobile Optimized)</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
 
 <script src="https://unpkg.com/three@0.160.0/build/three.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@mediapipe/hands/hands.js"></script>
@@ -11,17 +11,23 @@
 
 <style>
 body { margin: 0; overflow: hidden; background: #000; }
-#cam { position: fixed; top: 12px; right: 12px; width: 180px; height: 130px; border-radius: 12px; overflow: hidden; border: 2px solid rgba(200,150,255,0.5); box-shadow: 0 0 20px rgba(200,150,255,0.6); }
+#cam { position: fixed; top: 12px; right: 12px; width: 150px; height: 110px; border-radius: 12px; overflow: hidden; border: 2px solid rgba(200,150,255,0.5); box-shadow: 0 0 20px rgba(200,150,255,0.6); }
 #cam video { width: 100%; height: 100%; object-fit: cover; transform: scaleX(-1); }
-#hint { position: fixed; bottom: 12px; left: 50%; transform: translateX(-50%); color: #ccc; font-family: system-ui; font-size: 14px; }
+#hint { position: fixed; bottom: 12px; left: 50%; transform: translateX(-50%); color: #ccc; font-family: system-ui; font-size: 12px; text-align: center; }
 </style>
 </head>
 <body>
 
 <div id="cam"><video id="video" autoplay playsinline muted></video></div>
-<div id="hint">Click once • Move hand to rotate/tilt • Pinch to scale • Open hand to expand • Two hands to change shape • Move hand near vortex center for gravity effect</div>
+<div id="hint">Click once • Move hand to rotate/tilt • Pinch to scale • Open hand to expand • Two hands to switch shape</div>
 
 <script>
+// ===================
+// MOBILE OPTIMIZATION
+// ===================
+const isMobile = /Mobi|Android/i.test(navigator.userAgent);
+const COUNT = isMobile ? 10000 : 20000; // lower particle count on mobile
+
 // ===================
 // THREE.JS SETUP
 // ===================
@@ -37,7 +43,6 @@ document.body.appendChild(renderer.domElement);
 // ===================
 // PARTICLES
 // ===================
-const COUNT = 20000;
 const positions = new Float32Array(COUNT * 3);
 const velocities = new Float32Array(COUNT * 3);
 const colors = new Float32Array(COUNT * 3);
@@ -50,118 +55,94 @@ const material = new THREE.PointsMaterial({ size: 0.05, vertexColors: true, tran
 const particles = new THREE.Points(geometry, material);
 scene.add(particles);
 
-// Initialize random positions and velocities
+// Initialize particles
 for(let i=0;i<COUNT;i++){
-  positions[i*3] = (Math.random()-0.5)*20;
-  positions[i*3+1] = (Math.random()-0.5)*20;
-  positions[i*3+2] = (Math.random()-0.5)*20;
-  velocities[i*3] = (Math.random()-0.5)*0.02;
-  velocities[i*3+1] = (Math.random()-0.5)*0.02;
-  velocities[i*3+2] = (Math.random()-0.5)*0.02;
-  colors[i*3] = Math.random();
-  colors[i*3+1] = Math.random();
-  colors[i*3+2] = 1;
+  positions[i*3]=(Math.random()-0.5)*20;
+  positions[i*3+1]=(Math.random()-0.5)*20;
+  positions[i*3+2]=(Math.random()-0.5)*20;
+  velocities[i*3]=(Math.random()-0.5)*0.02;
+  velocities[i*3+1]=(Math.random()-0.5)*0.02;
+  velocities[i*3+2]=(Math.random()-0.5)*0.02;
+  colors[i*3]=Math.random();
+  colors[i*3+1]=Math.random();
+  colors[i*3+2]=1;
 }
-geometry.attributes.position.needsUpdate = true;
-geometry.attributes.color.needsUpdate = true;
-
-// ===================
-// SHAPE TEMPLATES
-// ===================
-let templateIndex = 0;
-const templateKeys = ['sphere','heart','ring','fireworks'];
-
-function applyTemplate(){
-  // Optional: reset particle positions per template
-}
+geometry.attributes.position.needsUpdate=true;
+geometry.attributes.color.needsUpdate=true;
 
 // ===================
 // HAND TRACKING
 // ===================
-let scale = 1, rotationX = 0, rotationY = 0, colorShift = 0, lastHands=0;
-let vortexCenter = new THREE.Vector3(0,0,0);
+let scale=1, rotationX=0, rotationY=0, colorShift=0, lastHands=0;
+let vortexCenter=new THREE.Vector3(0,0,0);
 
 const hands = new Hands({ locateFile:f=>`https://cdn.jsdelivr.net/npm/@mediapipe/hands/${f}` });
-hands.setOptions({ maxNumHands: 2, modelComplexity:1, minDetectionConfidence:0.7, minTrackingConfidence:0.7 });
+hands.setOptions({ maxNumHands:2, modelComplexity:1, minDetectionConfidence:0.7, minTrackingConfidence:0.7 });
 
-hands.onResults(results => {
+hands.onResults(results=>{
   const count = results.multiHandLandmarks?.length || 0;
   if(count>=1){
-    const lm = results.multiHandLandmarks[0];
-    // Rotate/tilt system
-    rotationY = (lm[0].x-0.5)*Math.PI*2;
-    rotationX = (lm[0].y-0.5)*Math.PI;
-    // Scale via pinch
-    const d = Math.hypot(lm[4].x-lm[8].x, lm[4].y-lm[8].y);
-    scale = THREE.MathUtils.clamp(d*8,0.5,3);
-    // Color shift
-    const open = Math.hypot(lm[0].x-lm[12].x, lm[0].y-lm[12].y);
-    colorShift = open*5;
-    // Vortex center in 3D (normalized screen to world)
-    vortexCenter.x = (lm[0].x-0.5)*20;
-    vortexCenter.y = -(lm[0].y-0.5)*20;
-    vortexCenter.z = 0;
+    const lm=results.multiHandLandmarks[0];
+    rotationY=(lm[0].x-0.5)*Math.PI*2;
+    rotationX=(lm[0].y-0.5)*Math.PI;
+    const d=Math.hypot(lm[4].x-lm[8].x,lm[4].y-lm[8].y);
+    scale=THREE.MathUtils.clamp(d*8,0.5,3);
+    const open=Math.hypot(lm[0].x-lm[12].x,lm[0].y-lm[12].y);
+    colorShift=open*5;
+    vortexCenter.x=(lm[0].x-0.5)*20;
+    vortexCenter.y=-(lm[0].y-0.5)*20;
+    vortexCenter.z=0;
   }
   if(count===2 && lastHands!==2){
-    templateIndex = (templateIndex+1)%templateKeys.length;
+    templateIndex=(templateIndex+1)%templateKeys.length;
     applyTemplate();
   }
-  lastHands = count;
+  lastHands=count;
 });
 
 // ===================
 // CAMERA
 // ===================
-const video = document.getElementById('video');
+const video=document.getElementById('video');
 let cam=null;
 async function startCamera(){
   if(cam) return;
   cam=new Camera(video,{ onFrame: async()=> video.readyState>=2 && hands.send({image:video}), width:640, height:480 });
   cam.start();
 }
-addEventListener('click', startCamera, {once:true});
+addEventListener('click',startCamera,{once:true});
 
 // ===================
 // ANIMATE
 // ===================
 function animate(){
   requestAnimationFrame(animate);
-
-  // Rotate system
-  particles.rotation.x += (rotationX-particles.rotation.x)*0.05;
-  particles.rotation.y += (rotationY-particles.rotation.y)*0.05;
+  particles.rotation.x+=(rotationX-particles.rotation.x)*0.05;
+  particles.rotation.y+=(rotationY-particles.rotation.y)*0.05;
   particles.scale.setScalar(scale);
 
-  // Update particle positions with vortex attraction
   for(let i=0;i<COUNT;i++){
-    let dx = vortexCenter.x-positions[i*3];
-    let dy = vortexCenter.y-positions[i*3+1];
-    let dz = vortexCenter.z-positions[i*3+2];
-    let dist = Math.sqrt(dx*dx+dy*dy+dz*dz)+0.001;
-    let force = 0.02 / dist;
-    velocities[i*3] += dx*force;
-    velocities[i*3+1] += dy*force;
-    velocities[i*3+2] += dz*force;
-
-    positions[i*3] += velocities[i*3];
-    positions[i*3+1] += velocities[i*3+1];
-    positions[i*3+2] += velocities[i*3+2];
-
-    // Some damping to prevent runaway
+    let dx=vortexCenter.x-positions[i*3];
+    let dy=vortexCenter.y-positions[i*3+1];
+    let dz=vortexCenter.z-positions[i*3+2];
+    let dist=Math.sqrt(dx*dx+dy*dy+dz*dz)+0.001;
+    let force=0.02/dist;
+    velocities[i*3]+=dx*force;
+    velocities[i*3+1]+=dy*force;
+    velocities[i*3+2]+=dz*force;
+    positions[i*3]+=velocities[i*3];
+    positions[i*3+1]+=velocities[i*3+1];
+    positions[i*3+2]+=velocities[i*3+2];
     velocities[i*3]*=0.95; velocities[i*3+1]*=0.95; velocities[i*3+2]*=0.95;
-
-    // Color dynamic
-    colors[i*3] = 0.5+0.5*Math.sin(performance.now()*0.002+colorShift);
+    colors[i*3]=0.5+0.5*Math.sin(performance.now()*0.002+colorShift);
   }
-
   geometry.attributes.position.needsUpdate=true;
   geometry.attributes.color.needsUpdate=true;
-
   renderer.render(scene,camera);
 }
 animate();
 
-window.addEventListener('resize',()=>{ camera.aspect=innerWidth/window.innerHeight; camera.updateProjectionMatrix(); renderer.setSize(innerWidth, innerHeight); });
+window.addEventListener('resize',()=>{ camera.aspect=innerWidth/window.innerHeight; camera.updateProjectionMatrix(); renderer.setSize(window.innerWidth, window.innerHeight); });
 </script>
 </body>
 </html>
