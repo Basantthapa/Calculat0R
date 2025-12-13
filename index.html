@@ -3,20 +3,17 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Fun Interactive Igloo-Style Site</title>
+<title>Igloo-Style Interactive 3D</title>
 <style>
   body, html {
     margin: 0;
     height: 100%;
-    overflow-x: hidden;
+    overflow: hidden;
     font-family: Arial, sans-serif;
     background: linear-gradient(45deg, #0a0a0a, #1e1e3f);
-    color: white;
   }
-  #container {
-    width: 100%;
-    height: 100vh;
-    position: relative;
+  canvas {
+    display: block;
   }
   .text {
     position: absolute;
@@ -25,103 +22,98 @@
     text-align: center;
     font-size: 3em;
     font-weight: bold;
+    color: white;
     pointer-events: none;
     z-index: 10;
   }
 </style>
 </head>
 <body>
-<div class="text">Welcome to My Fun Igloo-Style Site</div>
-<div id="container"></div>
+<div class="text">Welcome to My Interactive 3D Fun Site</div>
 
-<!-- Three.js CDN -->
 <script src="https://cdn.jsdelivr.net/npm/three@0.155.0/build/three.min.js"></script>
-<!-- GSAP CDN -->
+<script src="https://cdn.jsdelivr.net/npm/three@0.155.0/examples/js/controls/OrbitControls.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.14.0/gsap.min.js"></script>
 <script>
-const container = document.getElementById('container');
-
-// Scene, Camera, Renderer
 const scene = new THREE.Scene();
+
+// Camera
 const camera = new THREE.PerspectiveCamera(75, window.innerWidth/window.innerHeight, 0.1, 1000);
+camera.position.z = 10;
+
+// Renderer
 const renderer = new THREE.WebGLRenderer({antialias:true});
 renderer.setSize(window.innerWidth, window.innerHeight);
-container.appendChild(renderer.domElement);
+renderer.setPixelRatio(window.devicePixelRatio);
+document.body.appendChild(renderer.domElement);
+
+// Controls (optional smooth orbit)
+const controls = new THREE.OrbitControls(camera, renderer.domElement);
+controls.enableDamping = true;
+controls.dampingFactor = 0.05;
 
 // Lights
-const light1 = new THREE.PointLight(0xffffff, 1);
-light1.position.set(5,5,5);
-scene.add(light1);
-const light2 = new THREE.AmbientLight(0x404040);
-scene.add(light2);
+const ambient = new THREE.AmbientLight(0xffffff, 0.5);
+scene.add(ambient);
+const pointLight = new THREE.PointLight(0xffffff, 1);
+pointLight.position.set(10,10,10);
+scene.add(pointLight);
 
-camera.position.z = 5;
+// Objects
+const objects = [];
+const geometryTypes = [
+  new THREE.BoxGeometry(1,1,1),
+  new THREE.SphereGeometry(0.7,32,32),
+  new THREE.TorusGeometry(0.7,0.2,16,100)
+];
+const colors = [0x1e90ff, 0xff6347, 0x32cd32];
 
-// Shapes
-const shapes = [];
-const geometry1 = new THREE.BoxGeometry();
-const geometry2 = new THREE.SphereGeometry(0.5,32,32);
-const geometry3 = new THREE.TorusGeometry(0.5,0.2,16,100);
-const material1 = new THREE.MeshStandardMaterial({color: 0x1e90ff});
-const material2 = new THREE.MeshStandardMaterial({color: 0xff6347});
-const material3 = new THREE.MeshStandardMaterial({color: 0x32cd32});
-shapes.push(new THREE.Mesh(geometry1, material1));
-shapes.push(new THREE.Mesh(geometry2, material2));
-shapes.push(new THREE.Mesh(geometry3, material3));
-
-shapes[0].position.set(-2,0,0);
-shapes[1].position.set(0,0,0);
-shapes[2].position.set(2,0,0);
-
-shapes.forEach(shape => scene.add(shape));
-
-// Particles
-const particlesCount = 500;
-const particlesGeometry = new THREE.BufferGeometry();
-const positions = new Float32Array(particlesCount*3);
-for(let i=0;i<particlesCount*3;i++){
-  positions[i] = (Math.random() - 0.5) * 20;
+for(let i=0;i<30;i++){
+  const geo = geometryTypes[Math.floor(Math.random()*geometryTypes.length)];
+  const mat = new THREE.MeshStandardMaterial({color: colors[Math.floor(Math.random()*colors.length)], roughness:0.5, metalness:0.7});
+  const mesh = new THREE.Mesh(geo, mat);
+  mesh.position.set((Math.random()-0.5)*20, (Math.random()-0.5)*10, (Math.random()-0.5)*20);
+  mesh.rotation.set(Math.random()*Math.PI, Math.random()*Math.PI, 0);
+  scene.add(mesh);
+  objects.push(mesh);
 }
-particlesGeometry.setAttribute('position', new THREE.BufferAttribute(positions,3));
-const particlesMaterial = new THREE.PointsMaterial({color:0xffffff, size:0.05});
-const particles = new THREE.Points(particlesGeometry, particlesMaterial);
-scene.add(particles);
+
+// Background gradient animation
+let gradientAngle = 0;
 
 // Mouse interaction
-let mouseX = 0, mouseY = 0;
+let mouse = {x:0, y:0};
 document.addEventListener('mousemove', (e)=>{
-  mouseX = (e.clientX / window.innerWidth - 0.5) * 2;
-  mouseY = (e.clientY / window.innerHeight - 0.5) * 2;
+  mouse.x = (e.clientX/window.innerWidth - 0.5) * 2;
+  mouse.y = (e.clientY/window.innerHeight - 0.5) * 2;
 });
 
 // Scroll interaction
 let scrollY = 0;
-window.addEventListener('scroll', ()=>{
-  scrollY = window.scrollY * 0.001;
-});
+window.addEventListener('scroll', ()=>{ scrollY = window.scrollY*0.001; });
 
 // Animate
 function animate(){
   requestAnimationFrame(animate);
 
-  // Shapes animation
-  shapes.forEach((shape,i)=>{
-    shape.rotation.x += 0.01 + mouseY*0.05 + scrollY*0.02;
-    shape.rotation.y += 0.01 + mouseX*0.05 + scrollY*0.02;
-
-    // Glow effect on hover
-    const dx = mouseX*5 - shape.position.x;
-    const dy = mouseY*5 - shape.position.y;
-    const distance = Math.sqrt(dx*dx + dy*dy);
-    if(distance < 2) shape.material.emissive = new THREE.Color(0xffffff);
-    else shape.material.emissive = new THREE.Color(0x000000);
+  // Rotate objects and apply mouse influence
+  objects.forEach(obj=>{
+    obj.rotation.x += 0.01 + mouse.y*0.02;
+    obj.rotation.y += 0.01 + mouse.x*0.02;
+    obj.position.z += Math.sin(Date.now()*0.001 + obj.position.x)*0.002;
   });
 
-  // Particles rotate
-  particles.rotation.y += 0.001 + scrollY*0.005;
+  // Camera float effect
+  camera.position.x += (mouse.x*5 - camera.position.x)*0.05;
+  camera.position.y += (-mouse.y*5 - camera.position.y)*0.05;
+  camera.lookAt(0,0,0);
 
-  // Background gradient change
-  document.body.style.background = `linear-gradient(45deg, rgb(${Math.floor(10+mouseX*50)}, ${Math.floor(10+mouseY*50)}, 50), rgb(${Math.floor(30+mouseY*50)}, 30, ${Math.floor(63+mouseX*50)}))`;
+  // Update controls damping
+  controls.update();
+
+  // Animate background gradient
+  gradientAngle += 0.2;
+  document.body.style.background = `linear-gradient(${gradientAngle}deg, rgb(${50+mouse.x*50}, ${30+mouse.y*50}, 80), rgb(${80+mouse.y*50}, 50, ${100+mouse.x*50}))`;
 
   renderer.render(scene, camera);
 }
@@ -136,3 +128,4 @@ window.addEventListener('resize', ()=>{
 </script>
 </body>
 </html>
+
