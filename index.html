@@ -3,23 +3,17 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ultra Neon Pro Calculator</title>
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Rajdhani:wght@500;700&display=swap" rel="stylesheet">
+    <title>Neon Focus Timer</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&family=Rajdhani:wght@600&display=swap" rel="stylesheet">
     <style>
         :root {
-            --bg-dark: #050505;
-            --panel-bg: rgba(20, 20, 25, 0.8);
-            --neon-blue: #00f2ff;
-            --neon-purple: #bc13fe;
-            --neon-pink: #ff00de;
-            --text-glow: 0 0 10px rgba(0, 242, 255, 0.7), 0 0 20px rgba(0, 242, 255, 0.5);
+            --neon-red: #ff0055;
+            --neon-green: #00ff88;
+            --bg-dark: #08080a;
+            --glass: rgba(255, 255, 255, 0.03);
         }
 
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
 
         body {
             height: 100vh;
@@ -28,205 +22,206 @@
             align-items: center;
             background: var(--bg-dark);
             font-family: 'Rajdhani', sans-serif;
+            color: white;
             overflow: hidden;
         }
 
-        /* Moving Background Lights */
-        body::before {
-            content: "";
+        /* Ambient Background Glow */
+        .bg-glow {
             position: absolute;
-            width: 150%;
-            height: 150%;
-            background: conic-gradient(from 180deg at 50% 50%, #00f2ff, #bc13fe, #ff00de, #00f2ff);
-            animation: rotate 10s linear infinite;
-            opacity: 0.1;
-            filter: blur(100px);
+            width: 400px;
+            height: 400px;
+            background: var(--neon-red);
+            filter: blur(150px);
+            opacity: 0.15;
+            transition: background 1s ease;
             z-index: -1;
         }
 
-        @keyframes rotate {
-            from { transform: rotate(0deg); }
-            to { transform: rotate(360deg); }
-        }
-
-        .calculator {
-            width: 360px;
-            background: var(--panel-bg);
+        .container {
+            position: relative;
+            background: var(--glass);
             backdrop-filter: blur(20px);
+            padding: 40px;
+            border-radius: 50px;
             border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 40px;
-            padding: 30px;
-            box-shadow: 0 0 50px rgba(0, 0, 0, 1), inset 0 0 20px rgba(255, 255, 255, 0.05);
+            text-align: center;
+            box-shadow: 0 40px 100px rgba(0,0,0,0.5);
+            width: 350px;
+        }
+
+        /* The Circular Progress Bar */
+        .timer-circle {
             position: relative;
+            width: 250px;
+            height: 250px;
+            margin: 0 auto 30px;
         }
 
-        /* The glowing screen */
-        .screen {
-            background: rgba(0, 0, 0, 0.4);
-            border-radius: 20px;
-            padding: 25px;
-            margin-bottom: 30px;
-            border: 1px solid rgba(0, 242, 255, 0.3);
-            box-shadow: inset 0 0 15px rgba(0, 242, 255, 0.2), 0 0 15px rgba(0, 242, 255, 0.1);
+        svg {
+            transform: rotate(-90deg);
+            width: 250px;
+            height: 250px;
         }
 
-        #display {
-            width: 100%;
-            background: transparent;
-            border: none;
-            color: var(--neon-blue);
+        circle {
+            fill: none;
+            stroke-width: 8;
+            stroke-linecap: round;
+        }
+
+        .track { stroke: rgba(255, 255, 255, 0.05); }
+
+        .progress {
+            stroke: var(--neon-red);
+            stroke-dasharray: 691; /* 2 * PI * R (where R=110) */
+            stroke-dashoffset: 0;
+            transition: stroke-dashoffset 1s linear, stroke 1s ease;
+            filter: drop-shadow(0 0 8px var(--neon-red));
+        }
+
+        /* Time Display */
+        .time-wrapper {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+
+        #timer-label {
+            font-size: 0.9rem;
+            letter-spacing: 3px;
+            color: #888;
+            margin-bottom: 5px;
+        }
+
+        #time-left {
             font-family: 'Orbitron', sans-serif;
-            font-size: 2.2rem;
-            text-align: right;
-            outline: none;
-            text-shadow: var(--text-glow);
+            font-size: 3.5rem;
+            text-shadow: 0 0 20px rgba(255, 0, 85, 0.5);
         }
 
-        .grid {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 15px;
-        }
-
-        button {
-            height: 65px;
-            border-radius: 18px;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            background: rgba(255, 255, 255, 0.05);
+        /* Controls */
+        .controls button {
+            background: transparent;
+            border: 1px solid rgba(255,255,255,0.2);
             color: white;
-            font-size: 1.4rem;
-            font-weight: 700;
+            padding: 12px 25px;
+            border-radius: 15px;
             cursor: pointer;
-            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            position: relative;
-            overflow: hidden;
+            font-size: 1rem;
+            font-weight: 600;
+            transition: all 0.3s;
+            margin: 0 5px;
         }
 
-        /* The Glow Logic */
         button:hover {
-            background: rgba(255, 255, 255, 0.1);
-            border-color: rgba(255, 255, 255, 0.4);
-            transform: scale(1.05);
-            box-shadow: 0 0 20px rgba(255, 255, 255, 0.2);
+            background: white;
+            color: black;
+            box-shadow: 0 0 20px white;
         }
 
-        .btn-blue { 
-            color: var(--neon-blue); 
-            border-color: rgba(0, 242, 255, 0.3);
+        #start-btn.running {
+            border-color: var(--neon-red);
+            color: var(--neon-red);
         }
-        .btn-blue:hover { 
-            box-shadow: 0 0 20px var(--neon-blue); 
-            background: var(--neon-blue);
-            color: #000;
-        }
-
-        .btn-purple { 
-            color: var(--neon-purple); 
-            border-color: rgba(188, 19, 254, 0.3);
-        }
-        .btn-purple:hover { 
-            box-shadow: 0 0 20px var(--neon-purple); 
-            background: var(--neon-purple);
-            color: #fff;
-        }
-
-        .btn-pink { 
-            color: var(--neon-pink); 
-            border-color: rgba(255, 0, 222, 0.3);
-        }
-        .btn-pink:hover { 
-            box-shadow: 0 0 20px var(--neon-pink); 
-            background: var(--neon-pink);
-            color: #fff;
-        }
-
-        .equal {
-            grid-column: span 2;
-            background: linear-gradient(45deg, var(--neon-purple), var(--neon-pink));
-            border: none;
-            color: white;
-        }
-
-        .equal:hover {
-            box-shadow: 0 0 30px var(--neon-pink);
-        }
-
-        /* Button click effect */
-        button:active {
-            transform: scale(0.95);
-            filter: brightness(1.5);
-        }
-
     </style>
 </head>
 <body>
 
-    <div class="calculator">
-        <div class="screen">
-            <input type="text" id="display" value="0" readonly>
+    <div class="bg-glow" id="bg-glow"></div>
+
+    <div class="container">
+        <div class="timer-circle">
+            <svg>
+                <circle class="track" cx="125" cy="125" r="110"></circle>
+                <circle class="progress" id="progress-bar" cx="125" cy="125" r="110"></circle>
+            </svg>
+            <div class="time-wrapper">
+                <div id="timer-label">FOCUS</div>
+                <div id="time-left">25:00</div>
+            </div>
         </div>
-        
-        <div class="grid">
-            <button class="btn-pink" onclick="clearDisplay()">AC</button>
-            <button class="btn-pink" onclick="deleteChar()">DEL</button>
-            <button class="btn-purple" onclick="appendOp('/')">÷</button>
-            <button class="btn-purple" onclick="appendOp('*')">×</button>
-            
-            <button onclick="appendNum('7')">7</button>
-            <button onclick="appendNum('8')">8</button>
-            <button onclick="appendNum('9')">9</button>
-            <button class="btn-purple" onclick="appendOp('-')">-</button>
-            
-            <button onclick="appendNum('4')">4</button>
-            <button onclick="appendNum('5')">5</button>
-            <button onclick="appendNum('6')">6</button>
-            <button class="btn-purple" onclick="appendOp('+')">+</button>
-            
-            <button onclick="appendNum('1')">1</button>
-            <button onclick="appendNum('2')">2</button>
-            <button onclick="appendNum('3')">3</button>
-            <button onclick="appendNum('.')">.</button>
-            
-            <button onclick="appendNum('0')">0</button>
-            <button class="equal" onclick="calculate()">=</button>
+
+        <div class="controls">
+            <button id="start-btn" onclick="toggleTimer()">START</button>
+            <button onclick="resetTimer()">RESET</button>
         </div>
     </div>
 
     <script>
-        const display = document.getElementById('display');
+        let timeLeft = 25 * 60;
+        let timerId = null;
+        let isRunning = false;
+        let isBreak = false;
 
-        function appendNum(num) {
-            if (display.value === "0" || display.value === "Error") {
-                display.value = num;
+        const timeDisplay = document.getElementById('time-left');
+        const progressBar = document.getElementById('progress-bar');
+        const label = document.getElementById('timer-label');
+        const startBtn = document.getElementById('start-btn');
+        const bgGlow = document.getElementById('bg-glow');
+
+        const totalDash = 2 * Math.PI * 110;
+
+        function updateDisplay() {
+            const minutes = Math.floor(timeLeft / 60);
+            const seconds = timeLeft % 60;
+            timeDisplay.innerText = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+            
+            // Calculate SVG Offset
+            const totalTime = isBreak ? 5 * 60 : 25 * 60;
+            const offset = totalDash - (timeLeft / totalTime) * totalDash;
+            progressBar.style.strokeDashoffset = offset;
+        }
+
+        function toggleTimer() {
+            if (isRunning) {
+                clearInterval(timerId);
+                startBtn.innerText = "START";
+                startBtn.classList.remove('running');
             } else {
-                display.value += num;
+                timerId = setInterval(() => {
+                    timeLeft--;
+                    if (timeLeft < 0) {
+                        switchMode();
+                    }
+                    updateDisplay();
+                }, 1000);
+                startBtn.innerText = "PAUSE";
+                startBtn.classList.add('running');
             }
+            isRunning = !isRunning;
         }
 
-        function appendOp(op) {
-            const last = display.value.slice(-1);
-            if (['+','-','*','/'].includes(last)) return;
-            display.value += op;
+        function switchMode() {
+            isBreak = !isBreak;
+            timeLeft = isBreak ? 5 * 60 : 25 * 60;
+            label.innerText = isBreak ? "BREAK" : "FOCUS";
+            
+            // UI Color Change
+            const color = isBreak ? 'var(--neon-green)' : 'var(--neon-red)';
+            progressBar.style.stroke = color;
+            progressBar.style.filter = `drop-shadow(0 0 8px ${color})`;
+            timeDisplay.style.textShadow = `0 0 20px ${color}`;
+            bgGlow.style.background = color;
         }
 
-        function clearDisplay() {
-            display.value = "0";
+        function resetTimer() {
+            clearInterval(timerId);
+            isRunning = false;
+            isBreak = false;
+            timeLeft = 25 * 60;
+            label.innerText = "FOCUS";
+            startBtn.innerText = "START";
+            startBtn.classList.remove('running');
+            
+            // Reset Colors
+            progressBar.style.stroke = 'var(--neon-red)';
+            bgGlow.style.background = 'var(--neon-red)';
+            updateDisplay();
         }
 
-        function deleteChar() {
-            display.value = display.value.length > 1 ? display.value.slice(0, -1) : "0";
-        }
-
-        function calculate() {
-            try {
-                // Using Function to safely execute the math string
-                let result = new Function('return ' + display.value)();
-                display.value = Number.isInteger(result) ? result : result.toFixed(4);
-            } catch (e) {
-                display.value = "Error";
-                setTimeout(clearDisplay, 1000);
-            }
-        }
+        updateDisplay();
     </script>
 </body>
 </html>
