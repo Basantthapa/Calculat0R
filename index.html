@@ -3,14 +3,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Neon Focus Timer</title>
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&family=Rajdhani:wght@600&display=swap" rel="stylesheet">
+    <title>Ultimate Neon Glass Calculator</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500&family=Poppins:wght@300;500;700&display=swap" rel="stylesheet">
     <style>
         :root {
-            --neon-red: #ff0055;
-            --neon-green: #00ff88;
-            --bg-dark: #08080a;
-            --glass: rgba(255, 255, 255, 0.03);
+            --primary-glow: #00f2ff;
+            --secondary-glow: #bc13fe;
+            --danger-glow: #ff0055;
+            --glass-bg: rgba(255, 255, 255, 0.03);
+            --glass-border: rgba(255, 255, 255, 0.1);
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -20,208 +21,209 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            background: var(--bg-dark);
-            font-family: 'Rajdhani', sans-serif;
-            color: white;
+            background: #050505;
+            font-family: 'Poppins', sans-serif;
             overflow: hidden;
         }
 
-        /* Ambient Background Glow */
-        .bg-glow {
+        /* Animated Background Gradients */
+        .bg-circles {
             position: absolute;
-            width: 400px;
-            height: 400px;
-            background: var(--neon-red);
-            filter: blur(150px);
-            opacity: 0.15;
-            transition: background 1s ease;
+            top: 0; left: 0; width: 100%; height: 100%;
             z-index: -1;
+            filter: blur(80px);
         }
 
-        .container {
-            position: relative;
-            background: var(--glass);
-            backdrop-filter: blur(20px);
-            padding: 40px;
-            border-radius: 50px;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            text-align: center;
-            box-shadow: 0 40px 100px rgba(0,0,0,0.5);
-            width: 350px;
-        }
-
-        /* The Circular Progress Bar */
-        .timer-circle {
-            position: relative;
-            width: 250px;
-            height: 250px;
-            margin: 0 auto 30px;
-        }
-
-        svg {
-            transform: rotate(-90deg);
-            width: 250px;
-            height: 250px;
-        }
-
-        circle {
-            fill: none;
-            stroke-width: 8;
-            stroke-linecap: round;
-        }
-
-        .track { stroke: rgba(255, 255, 255, 0.05); }
-
-        .progress {
-            stroke: var(--neon-red);
-            stroke-dasharray: 691; /* 2 * PI * R (where R=110) */
-            stroke-dashoffset: 0;
-            transition: stroke-dashoffset 1s linear, stroke 1s ease;
-            filter: drop-shadow(0 0 8px var(--neon-red));
-        }
-
-        /* Time Display */
-        .time-wrapper {
+        .circle {
             position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
+            border-radius: 50%;
+            opacity: 0.5;
+            animation: move 20s infinite alternate;
         }
 
-        #timer-label {
+        .c1 { width: 400px; height: 400px; background: var(--primary-glow); top: -10%; left: -10%; }
+        .c2 { width: 350px; height: 350px; background: var(--secondary-glow); bottom: -10%; right: -10%; animation-delay: -5s; }
+
+        @keyframes move {
+            from { transform: translate(0, 0) scale(1); }
+            to { transform: translate(100px, 100px) scale(1.2); }
+        }
+
+        /* Calculator Body */
+        .calculator {
+            width: 380px;
+            background: var(--glass-bg);
+            backdrop-filter: blur(25px);
+            border: 1px solid var(--glass-border);
+            border-radius: 40px;
+            padding: 30px;
+            box-shadow: 0 50px 100px rgba(0,0,0,0.5);
+            transition: transform 0.3s ease;
+        }
+
+        /* Display Area */
+        .screen {
+            text-align: right;
+            margin-bottom: 25px;
+            padding: 15px;
+            background: rgba(0,0,0,0.2);
+            border-radius: 20px;
+            border: 1px solid rgba(255,255,255,0.05);
+        }
+
+        #history {
             font-size: 0.9rem;
-            letter-spacing: 3px;
-            color: #888;
+            color: rgba(255,255,255,0.4);
+            height: 20px;
             margin-bottom: 5px;
-        }
-
-        #time-left {
             font-family: 'Orbitron', sans-serif;
-            font-size: 3.5rem;
-            text-shadow: 0 0 20px rgba(255, 0, 85, 0.5);
         }
 
-        /* Controls */
-        .controls button {
-            background: transparent;
-            border: 1px solid rgba(255,255,255,0.2);
-            color: white;
-            padding: 12px 25px;
-            border-radius: 15px;
+        #result {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 2.5rem;
+            color: #fff;
+            text-shadow: 0 0 15px var(--primary-glow);
+            overflow-x: auto;
+            white-space: nowrap;
+        }
+
+        /* Buttons Grid */
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 12px;
+        }
+
+        button {
+            height: 65px;
+            border: none;
+            border-radius: 18px;
+            background: var(--glass-bg);
+            color: #fff;
+            font-size: 1.2rem;
+            font-weight: 500;
             cursor: pointer;
-            font-size: 1rem;
-            font-weight: 600;
-            transition: all 0.3s;
-            margin: 0 5px;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            border: 1px solid transparent;
         }
 
         button:hover {
-            background: white;
-            color: black;
-            box-shadow: 0 0 20px white;
+            background: rgba(255,255,255,0.1);
+            border-color: rgba(255,255,255,0.2);
+            transform: translateY(-3px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.2);
         }
 
-        #start-btn.running {
-            border-color: var(--neon-red);
-            color: var(--neon-red);
+        button:active { transform: translateY(0); }
+
+        /* Specific Styles */
+        .op { color: var(--primary-glow); font-weight: 700; }
+        .clear { color: var(--danger-glow); }
+        .sci { color: var(--secondary-glow); font-size: 0.9rem; }
+        
+        .equal {
+            background: linear-gradient(135deg, var(--primary-glow), var(--secondary-glow));
+            color: #000;
+            font-weight: 700;
+            grid-column: span 2;
+        }
+
+        .equal:hover {
+            box-shadow: 0 0 30px var(--primary-glow);
+            color: #fff;
         }
     </style>
 </head>
 <body>
 
-    <div class="bg-glow" id="bg-glow"></div>
+    <div class="bg-circles">
+        <div class="circle c1"></div>
+        <div class="circle c2"></div>
+    </div>
 
-    <div class="container">
-        <div class="timer-circle">
-            <svg>
-                <circle class="track" cx="125" cy="125" r="110"></circle>
-                <circle class="progress" id="progress-bar" cx="125" cy="125" r="110"></circle>
-            </svg>
-            <div class="time-wrapper">
-                <div id="timer-label">FOCUS</div>
-                <div id="time-left">25:00</div>
-            </div>
+    <div class="calculator">
+        <div class="screen">
+            <div id="history"></div>
+            <div id="result">0</div>
         </div>
 
-        <div class="controls">
-            <button id="start-btn" onclick="toggleTimer()">START</button>
-            <button onclick="resetTimer()">RESET</button>
+        <div class="grid">
+            <button class="clear" onclick="allClear()">AC</button>
+            <button class="sci" onclick="append('Math.sqrt(')">√</button>
+            <button class="sci" onclick="append('**')">^</button>
+            <button class="op" onclick="append('/')">÷</button>
+
+            <button onclick="append('7')">7</button>
+            <button onclick="append('8')">8</button>
+            <button onclick="append('9')">9</button>
+            <button class="op" onclick="append('*')">×</button>
+
+            <button onclick="append('4')">4</button>
+            <button onclick="append('5')">5</button>
+            <button onclick="append('6')">6</button>
+            <button class="op" onclick="append('-')">-</button>
+
+            <button onclick="append('1')">1</button>
+            <button onclick="append('2')">2</button>
+            <button onclick="append('3')">3</button>
+            <button class="op" onclick="append('+')">+</button>
+
+            <button onclick="append('0')">0</button>
+            <button onclick="append('.')">.</button>
+            <button class="equal" onclick="calculate()">=</button>
         </div>
     </div>
 
     <script>
-        let timeLeft = 25 * 60;
-        let timerId = null;
-        let isRunning = false;
-        let isBreak = false;
+        const resDisplay = document.getElementById('result');
+        const histDisplay = document.getElementById('history');
+        let currentInput = "";
 
-        const timeDisplay = document.getElementById('time-left');
-        const progressBar = document.getElementById('progress-bar');
-        const label = document.getElementById('timer-label');
-        const startBtn = document.getElementById('start-btn');
-        const bgGlow = document.getElementById('bg-glow');
-
-        const totalDash = 2 * Math.PI * 110;
-
-        function updateDisplay() {
-            const minutes = Math.floor(timeLeft / 60);
-            const seconds = timeLeft % 60;
-            timeDisplay.innerText = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
-            
-            // Calculate SVG Offset
-            const totalTime = isBreak ? 5 * 60 : 25 * 60;
-            const offset = totalDash - (timeLeft / totalTime) * totalDash;
-            progressBar.style.strokeDashoffset = offset;
-        }
-
-        function toggleTimer() {
-            if (isRunning) {
-                clearInterval(timerId);
-                startBtn.innerText = "START";
-                startBtn.classList.remove('running');
+        function append(val) {
+            if (resDisplay.innerText === "0" || resDisplay.innerText === "Error") {
+                currentInput = val;
             } else {
-                timerId = setInterval(() => {
-                    timeLeft--;
-                    if (timeLeft < 0) {
-                        switchMode();
-                    }
-                    updateDisplay();
-                }, 1000);
-                startBtn.innerText = "PAUSE";
-                startBtn.classList.add('running');
+                currentInput += val;
             }
-            isRunning = !isRunning;
+            resDisplay.innerText = currentInput.replace('**', '^').replace('Math.sqrt(', '√(');
         }
 
-        function switchMode() {
-            isBreak = !isBreak;
-            timeLeft = isBreak ? 5 * 60 : 25 * 60;
-            label.innerText = isBreak ? "BREAK" : "FOCUS";
-            
-            // UI Color Change
-            const color = isBreak ? 'var(--neon-green)' : 'var(--neon-red)';
-            progressBar.style.stroke = color;
-            progressBar.style.filter = `drop-shadow(0 0 8px ${color})`;
-            timeDisplay.style.textShadow = `0 0 20px ${color}`;
-            bgGlow.style.background = color;
+        function allClear() {
+            currentInput = "";
+            resDisplay.innerText = "0";
+            histDisplay.innerText = "";
         }
 
-        function resetTimer() {
-            clearInterval(timerId);
-            isRunning = false;
-            isBreak = false;
-            timeLeft = 25 * 60;
-            label.innerText = "FOCUS";
-            startBtn.innerText = "START";
-            startBtn.classList.remove('running');
-            
-            // Reset Colors
-            progressBar.style.stroke = 'var(--neon-red)';
-            bgGlow.style.background = 'var(--neon-red)';
-            updateDisplay();
+        function calculate() {
+            try {
+                // Professional evaluation
+                let expression = currentInput;
+                // Auto-close square root brackets if user forgot
+                if (expression.includes('Math.sqrt(') && !expression.includes(')')) expression += ')';
+                
+                let result = eval(expression);
+                histDisplay.innerText = resDisplay.innerText + " =";
+                
+                // Handle decimals nicely
+                resDisplay.innerText = Number.isInteger(result) ? result : result.toFixed(4);
+                currentInput = resDisplay.innerText;
+            } catch (e) {
+                resDisplay.innerText = "Error";
+                setTimeout(allClear, 1500);
+            }
         }
 
-        updateDisplay();
+        // Add keyboard support for professional feel
+        document.addEventListener('keydown', (e) => {
+            if (e.key >= 0 && e.key <= 9) append(e.key);
+            if (e.key === '+') append('+');
+            if (e.key === '-') append('-');
+            if (e.key === '*') append('*');
+            if (e.key === '/') append('/');
+            if (e.key === 'Enter') calculate();
+            if (e.key === 'Escape') allClear();
+        });
     </script>
 </body>
 </html>
