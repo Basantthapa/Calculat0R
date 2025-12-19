@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ultimate Gaming Calculator</title>
+    <title>Ultimate Neon Glass Calculator</title>
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500&family=Poppins:wght@300;500;700&display=swap" rel="stylesheet">
     <style>
         :root {
@@ -14,28 +14,8 @@
             --glass-border: rgba(255, 255, 255, 0.1);
         }
 
-        /* --- GAMING CURSOR STYLES --- */
-        * { 
-            margin: 0; 
-            padding: 0; 
-            box-sizing: border-box; 
-            cursor: none !important; /* Hide default cursor */
-        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
 
-        #custom-cursor {
-            position: fixed;
-            width: 40px;
-            height: 40px;
-            background: url('https://i.ibb.co/VWV08Yp/gaming-pointer.png') no-repeat center;
-            background-size: contain;
-            pointer-events: none;
-            z-index: 10000;
-            filter: drop-shadow(0 0 5px var(--danger-glow));
-            transform: translate(-10%, -10%); /* Adjust to align point of arrow */
-            will-change: transform;
-        }
-
-        /* --- CALCULATOR STYLES --- */
         body {
             height: 100vh;
             display: flex;
@@ -46,6 +26,7 @@
             overflow: hidden;
         }
 
+        /* Animated Background Gradients */
         .bg-circles {
             position: absolute;
             top: 0; left: 0; width: 100%; height: 100%;
@@ -56,68 +37,105 @@
         .circle {
             position: absolute;
             border-radius: 50%;
-            opacity: 0.4;
-            animation: move 15s infinite alternate;
+            opacity: 0.5;
+            animation: move 20s infinite alternate;
         }
 
-        .c1 { width: 400px; height: 400px; background: var(--primary-glow); top: -5%; left: -5%; }
-        .c2 { width: 350px; height: 350px; background: var(--danger-glow); bottom: -5%; right: -5%; }
+        .c1 { width: 400px; height: 400px; background: var(--primary-glow); top: -10%; left: -10%; }
+        .c2 { width: 350px; height: 350px; background: var(--secondary-glow); bottom: -10%; right: -10%; animation-delay: -5s; }
 
         @keyframes move {
-            from { transform: translate(0, 0); }
-            to { transform: translate(100px, 100px); }
+            from { transform: translate(0, 0) scale(1); }
+            to { transform: translate(100px, 100px) scale(1.2); }
         }
 
+        /* Calculator Body */
         .calculator {
             width: 380px;
             background: var(--glass-bg);
             backdrop-filter: blur(25px);
             border: 1px solid var(--glass-border);
-            border-radius: 35px;
-            padding: 25px;
-            box-shadow: 0 50px 100px rgba(0,0,0,0.8);
+            border-radius: 40px;
+            padding: 30px;
+            box-shadow: 0 50px 100px rgba(0,0,0,0.5);
+            transition: transform 0.3s ease;
         }
 
+        /* Display Area */
         .screen {
             text-align: right;
-            margin-bottom: 20px;
-            padding: 20px;
-            background: rgba(0,0,0,0.4);
+            margin-bottom: 25px;
+            padding: 15px;
+            background: rgba(0,0,0,0.2);
             border-radius: 20px;
-            border: 1px solid var(--glass-border);
+            border: 1px solid rgba(255,255,255,0.05);
         }
 
-        #history { font-family: 'Orbitron'; font-size: 0.8rem; color: #666; height: 20px; }
-        #result { font-family: 'Orbitron'; font-size: 2.5rem; color: #fff; text-shadow: 0 0 10px var(--primary-glow); }
+        #history {
+            font-size: 0.9rem;
+            color: rgba(255,255,255,0.4);
+            height: 20px;
+            margin-bottom: 5px;
+            font-family: 'Orbitron', sans-serif;
+        }
 
-        .grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+        #result {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 2.5rem;
+            color: #fff;
+            text-shadow: 0 0 15px var(--primary-glow);
+            overflow-x: auto;
+            white-space: nowrap;
+        }
+
+        /* Buttons Grid */
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 12px;
+        }
 
         button {
             height: 65px;
             border: none;
-            border-radius: 15px;
-            background: rgba(255,255,255,0.05);
+            border-radius: 18px;
+            background: var(--glass-bg);
             color: #fff;
             font-size: 1.2rem;
-            transition: 0.2s;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            border: 1px solid transparent;
         }
 
         button:hover {
-            background: rgba(255,255,255,0.15);
-            transform: scale(1.05);
-            box-shadow: 0 0 15px rgba(255,255,255,0.2);
+            background: rgba(255,255,255,0.1);
+            border-color: rgba(255,255,255,0.2);
+            transform: translateY(-3px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.2);
         }
 
-        .op { color: var(--primary-glow); }
-        .equal { 
-            background: linear-gradient(135deg, var(--danger-glow), var(--secondary-glow));
+        button:active { transform: translateY(0); }
+
+        /* Specific Styles */
+        .op { color: var(--primary-glow); font-weight: 700; }
+        .clear { color: var(--danger-glow); }
+        .sci { color: var(--secondary-glow); font-size: 0.9rem; }
+        
+        .equal {
+            background: linear-gradient(135deg, var(--primary-glow), var(--secondary-glow));
+            color: #000;
+            font-weight: 700;
             grid-column: span 2;
+        }
+
+        .equal:hover {
+            box-shadow: 0 0 30px var(--primary-glow);
+            color: #fff;
         }
     </style>
 </head>
 <body>
-
-    <div id="custom-cursor"></div>
 
     <div class="bg-circles">
         <div class="circle c1"></div>
@@ -129,23 +147,28 @@
             <div id="history"></div>
             <div id="result">0</div>
         </div>
+
         <div class="grid">
-            <button onclick="allClear()" style="color:var(--danger-glow)">AC</button>
-            <button class="op" onclick="append('**')">^</button>
-            <button class="op" onclick="append('%')">%</button>
+            <button class="clear" onclick="allClear()">AC</button>
+            <button class="sci" onclick="append('Math.sqrt(')">√</button>
+            <button class="sci" onclick="append('**')">^</button>
             <button class="op" onclick="append('/')">÷</button>
+
             <button onclick="append('7')">7</button>
             <button onclick="append('8')">8</button>
             <button onclick="append('9')">9</button>
             <button class="op" onclick="append('*')">×</button>
+
             <button onclick="append('4')">4</button>
             <button onclick="append('5')">5</button>
             <button onclick="append('6')">6</button>
             <button class="op" onclick="append('-')">-</button>
+
             <button onclick="append('1')">1</button>
             <button onclick="append('2')">2</button>
             <button onclick="append('3')">3</button>
             <button class="op" onclick="append('+')">+</button>
+
             <button onclick="append('0')">0</button>
             <button onclick="append('.')">.</button>
             <button class="equal" onclick="calculate()">=</button>
@@ -153,26 +176,17 @@
     </div>
 
     <script>
-        // CURSOR LOGIC
-        const cursor = document.getElementById('custom-cursor');
-        
-        document.addEventListener('mousemove', (e) => {
-            // Using requestAnimationFrame for high-performance gaming feel
-            window.requestAnimationFrame(() => {
-                cursor.style.left = e.clientX + 'px';
-                cursor.style.top = e.clientY + 'px';
-            });
-        });
-
-        // CALCULATOR LOGIC
         const resDisplay = document.getElementById('result');
         const histDisplay = document.getElementById('history');
         let currentInput = "";
 
         function append(val) {
-            if (resDisplay.innerText === "0") currentInput = val;
-            else currentInput += val;
-            resDisplay.innerText = currentInput;
+            if (resDisplay.innerText === "0" || resDisplay.innerText === "Error") {
+                currentInput = val;
+            } else {
+                currentInput += val;
+            }
+            resDisplay.innerText = currentInput.replace('**', '^').replace('Math.sqrt(', '√(');
         }
 
         function allClear() {
@@ -183,15 +197,33 @@
 
         function calculate() {
             try {
-                let result = eval(currentInput);
-                histDisplay.innerText = currentInput + " =";
-                resDisplay.innerText = Number.isInteger(result) ? result : result.toFixed(2);
+                // Professional evaluation
+                let expression = currentInput;
+                // Auto-close square root brackets if user forgot
+                if (expression.includes('Math.sqrt(') && !expression.includes(')')) expression += ')';
+                
+                let result = eval(expression);
+                histDisplay.innerText = resDisplay.innerText + " =";
+                
+                // Handle decimals nicely
+                resDisplay.innerText = Number.isInteger(result) ? result : result.toFixed(4);
                 currentInput = resDisplay.innerText;
             } catch (e) {
                 resDisplay.innerText = "Error";
-                setTimeout(allClear, 1000);
+                setTimeout(allClear, 1500);
             }
         }
+
+        // Add keyboard support for professional feel
+        document.addEventListener('keydown', (e) => {
+            if (e.key >= 0 && e.key <= 9) append(e.key);
+            if (e.key === '+') append('+');
+            if (e.key === '-') append('-');
+            if (e.key === '*') append('*');
+            if (e.key === '/') append('/');
+            if (e.key === 'Enter') calculate();
+            if (e.key === 'Escape') allClear();
+        });
     </script>
 </body>
 </html>
