@@ -3,227 +3,256 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ultimate Neon Glass Calculator</title>
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500&family=Poppins:wght@300;500;700&display=swap" rel="stylesheet">
+    <title>Himal Academy - Premier Educational Institution</title>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
     <style>
+        /* Base Reset */
+        .himal-wrapper * { margin: 0; padding: 0; box-sizing: border-box; }
         :root {
-            --primary-glow: #00f2ff;
-            --secondary-glow: #bc13fe;
-            --danger-glow: #ff0055;
-            --glass-bg: rgba(255, 255, 255, 0.03);
-            --glass-border: rgba(255, 255, 255, 0.1);
+            --primary: #1e3a8a;
+            --primary-light: #3b82f6;
+            --accent: #dc2626;
+            --accent-light: #ef4444;
+            --gold: #d97706;
+            --dark: #0f172a;
+            --light: #f8fafc;
+            --gray: #64748b;
         }
 
-        * { margin: 0; padding: 0; box-sizing: border-box; }
+        .himal-wrapper {
+            font-family: 'Inter', sans-serif;
+            line-height: 1.6;
+            color: var(--dark);
+            background: #fff;
+        }
 
-        body {
-            height: 100vh;
+        .himal-wrapper h1, .himal-wrapper h2, .himal-wrapper h3, .himal-wrapper h4 {
+            font-family: 'Playfair Display', serif;
+        }
+
+        /* Navigation */
+        .navbar {
+            position: sticky;
+            top: 0;
+            width: 100%;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            z-index: 1000;
+            padding: 1rem 5%;
             display: flex;
-            justify-content: center;
+            justify-content: space-between;
             align-items: center;
-            background: #050505;
-            font-family: 'Poppins', sans-serif;
-            overflow: hidden;
+            box-shadow: 0 2px 20px rgba(0,0,0,0.1);
         }
 
-        /* Animated Background Gradients */
-        .bg-circles {
-            position: absolute;
-            top: 0; left: 0; width: 100%; height: 100%;
-            z-index: -1;
-            filter: blur(80px);
-        }
-
-        .circle {
-            position: absolute;
+        .logo { display: flex; align-items: center; gap: 1rem; text-decoration: none; }
+        .logo-icon {
+            width: 50px; height: 50px;
+            background: linear-gradient(135deg, var(--primary), var(--primary-light));
             border-radius: 50%;
-            opacity: 0.5;
-            animation: move 20s infinite alternate;
+            display: flex; align-items: center; justify-content: center;
+            color: white; font-weight: bold; font-size: 1.2rem;
         }
 
-        .c1 { width: 400px; height: 400px; background: var(--primary-glow); top: -10%; left: -10%; }
-        .c2 { width: 350px; height: 350px; background: var(--secondary-glow); bottom: -10%; right: -10%; animation-delay: -5s; }
+        .logo-text h1 { font-size: 1.5rem; color: var(--primary); line-height: 1.2; margin:0; }
+        .logo-text span { font-size: 0.75rem; color: var(--gray); font-family: 'Inter', sans-serif; }
 
-        @keyframes move {
-            from { transform: translate(0, 0) scale(1); }
-            to { transform: translate(100px, 100px) scale(1.2); }
+        .nav-links { display: flex; gap: 2rem; list-style: none; }
+        .nav-links a { text-decoration: none; color: var(--dark); font-weight: 500; transition: 0.3s; }
+        .nav-links a:hover { color: var(--accent); }
+
+        /* Hero */
+        .hero {
+            height: 70vh;
+            background: linear-gradient(135deg, rgba(30, 58, 138, 0.8), rgba(30, 58, 138, 0.6)),
+                        url('https://images.unsplash.com/photo-1523050854058-8df90110c9f1?w=1920') center/cover;
+            display: flex; align-items: center; justify-content: center;
+            text-align: center; color: white; padding: 2rem;
         }
 
-        /* Calculator Body */
-        .calculator {
-            width: 380px;
-            background: var(--glass-bg);
-            backdrop-filter: blur(25px);
-            border: 1px solid var(--glass-border);
-            border-radius: 40px;
-            padding: 30px;
-            box-shadow: 0 50px 100px rgba(0,0,0,0.5);
-            transition: transform 0.3s ease;
-        }
-
-        /* Display Area */
-        .screen {
-            text-align: right;
-            margin-bottom: 25px;
-            padding: 15px;
-            background: rgba(0,0,0,0.2);
-            border-radius: 20px;
-            border: 1px solid rgba(255,255,255,0.05);
-        }
-
-        #history {
-            font-size: 0.9rem;
-            color: rgba(255,255,255,0.4);
-            height: 20px;
-            margin-bottom: 5px;
-            font-family: 'Orbitron', sans-serif;
-        }
-
-        #result {
-            font-family: 'Orbitron', sans-serif;
-            font-size: 2.5rem;
-            color: #fff;
-            text-shadow: 0 0 15px var(--primary-glow);
-            overflow-x: auto;
-            white-space: nowrap;
-        }
-
-        /* Buttons Grid */
-        .grid {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 12px;
-        }
-
-        button {
-            height: 65px;
-            border: none;
-            border-radius: 18px;
-            background: var(--glass-bg);
-            color: #fff;
-            font-size: 1.2rem;
-            font-weight: 500;
-            cursor: pointer;
-            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-            border: 1px solid transparent;
-        }
-
-        button:hover {
-            background: rgba(255,255,255,0.1);
-            border-color: rgba(255,255,255,0.2);
-            transform: translateY(-3px);
-            box-shadow: 0 10px 20px rgba(0,0,0,0.2);
-        }
-
-        button:active { transform: translateY(0); }
-
-        /* Specific Styles */
-        .op { color: var(--primary-glow); font-weight: 700; }
-        .clear { color: var(--danger-glow); }
-        .sci { color: var(--secondary-glow); font-size: 0.9rem; }
+        .hero-content { max-width: 800px; animation: fadeInUp 1s ease; }
+        @keyframes fadeInUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
         
-        .equal {
-            background: linear-gradient(135deg, var(--primary-glow), var(--secondary-glow));
-            color: #000;
-            font-weight: 700;
-            grid-column: span 2;
+        .hero h2 { font-size: 3rem; margin-bottom: 1rem; }
+        .btn {
+            display: inline-block; padding: 1rem 2.5rem; background: var(--accent);
+            color: white; text-decoration: none; border-radius: 50px; font-weight: 600;
+            transition: 0.3s; box-shadow: 0 4px 15px rgba(220, 38, 38, 0.4);
         }
+        .btn:hover { background: var(--accent-light); transform: translateY(-3px); }
 
-        .equal:hover {
-            box-shadow: 0 0 30px var(--primary-glow);
-            color: #fff;
+        /* Grid Layouts */
+        .section-padding { padding: 5rem 5%; }
+        .section-title { text-align: center; font-size: 2.5rem; color: var(--primary); margin-bottom: 3rem; }
+        .grid-3 { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 2rem; }
+
+        .card { background: white; border-radius: 20px; overflow: hidden; box-shadow: 0 10px 30px rgba(0,0,0,0.05); transition: 0.3s; }
+        .card:hover { transform: translateY(-10px); }
+        .card-img { height: 200px; width: 100%; object-fit: cover; }
+        .card-body { padding: 2rem; }
+
+        /* Stats */
+        .stats { background: var(--primary); color: white; padding: 4rem 5%; text-align: center; }
+        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 2rem; }
+        .stat-item h3 { font-size: 2.5rem; color: var(--gold); }
+
+        /* Corners */
+        .corners { background: var(--light); }
+        .article-item { display: flex; gap: 1rem; margin-bottom: 1.5rem; background: #fff; padding: 1rem; border-radius: 10px; }
+        .article-thumb { width: 80px; height: 80px; border-radius: 8px; object-fit: cover; }
+
+        /* Footer */
+        .footer { background: var(--dark); color: white; padding: 4rem 5% 2rem; }
+        .footer-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 3rem; }
+        .footer h4 { color: var(--gold); margin-bottom: 1.5rem; }
+        .footer p { opacity: 0.7; font-size: 0.9rem; }
+        .footer-bottom { text-align: center; margin-top: 3rem; padding-top: 2rem; border-top: 1px solid rgba(255,255,255,0.1); font-size: 0.8rem; }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .nav-links { display: none; }
+            .hero h2 { font-size: 2rem; }
         }
     </style>
 </head>
 <body>
 
-    <div class="bg-circles">
-        <div class="circle c1"></div>
-        <div class="circle c2"></div>
-    </div>
+<div class="himal-wrapper">
+    <nav class="navbar">
+        <a href="#" class="logo">
+            <div class="logo-icon">HA</div>
+            <div class="logo-text">
+                <h1>Himal Academy</h1>
+                <span>Excellence in Education</span>
+            </div>
+        </a>
+        <ul class="nav-links">
+            <li><a href="#home">Home</a></li>
+            <li><a href="#about">About</a></li>
+            <li><a href="#news">News</a></li>
+            <li><a href="#contact">Contact</a></li>
+        </ul>
+    </nav>
 
-    <div class="calculator">
-        <div class="screen">
-            <div id="history"></div>
-            <div id="result">0</div>
+    <section class="hero" id="home">
+        <div class="hero-content">
+            <h2>Nurturing Minds, Building Futures</h2>
+            <p>Experience world-class education with a focus on holistic development and character building in the heart of Nepal.</p>
+            <br>
+            <a href="#contact" class="btn">Apply Now</a>
         </div>
+    </section>
 
-        <div class="grid">
-            <button class="clear" onclick="allClear()">AC</button>
-            <button class="sci" onclick="append('Math.sqrt(')">√</button>
-            <button class="sci" onclick="append('**')">^</button>
-            <button class="op" onclick="append('/')">÷</button>
-
-            <button onclick="append('7')">7</button>
-            <button onclick="append('8')">8</button>
-            <button onclick="append('9')">9</button>
-            <button class="op" onclick="append('*')">×</button>
-
-            <button onclick="append('4')">4</button>
-            <button onclick="append('5')">5</button>
-            <button onclick="append('6')">6</button>
-            <button class="op" onclick="append('-')">-</button>
-
-            <button onclick="append('1')">1</button>
-            <button onclick="append('2')">2</button>
-            <button onclick="append('3')">3</button>
-            <button class="op" onclick="append('+')">+</button>
-
-            <button onclick="append('0')">0</button>
-            <button onclick="append('.')">.</button>
-            <button class="equal" onclick="calculate()">=</button>
+    <section class="section-padding" id="about">
+        <h2 class="section-title">Why Choose Us</h2>
+        <div class="grid-3">
+            <div class="card">
+                <img src="https://images.unsplash.com/photo-1503676260728-1c00da094a0b?w=800" class="card-img" alt="Academics">
+                <div class="card-body">
+                    <h3>Top Academics</h3>
+                    <p>Consistent results and a curriculum designed for the modern world.</p>
+                </div>
+            </div>
+            <div class="card">
+                <img src="https://images.unsplash.com/photo-1524178232363-1fb2b075b655?w=800" class="card-img" alt="Facilities">
+                <div class="card-body">
+                    <h3>Modern Facilities</h3>
+                    <p>High-tech labs, library, and sports complexes for all-round growth.</p>
+                </div>
+            </div>
+            <div class="card">
+                <img src="https://images.unsplash.com/photo-1544531586-fde5298cdd40?w=800" class="card-img" alt="Culture">
+                <div class="card-body">
+                    <h3>Cultural Values</h3>
+                    <p>Rooted in tradition, preparing students for a global future.</p>
+                </div>
+            </div>
         </div>
-    </div>
+    </section>
 
-    <script>
-        const resDisplay = document.getElementById('result');
-        const histDisplay = document.getElementById('history');
-        let currentInput = "";
+    <section class="stats">
+        <div class="stats-grid">
+            <div class="stat-item"><h3>25+</h3><p>Years Excellence</p></div>
+            <div class="stat-item"><h3>150+</h3><p>Faculty Members</p></div>
+            <div class="stat-item"><h3>3000+</h3><p>Happy Students</p></div>
+            <div class="stat-item"><h3>100%</h3><p>Success Rate</p></div>
+        </div>
+    </section>
 
-        function append(val) {
-            if (resDisplay.innerText === "0" || resDisplay.innerText === "Error") {
-                currentInput = val;
-            } else {
-                currentInput += val;
-            }
-            resDisplay.innerText = currentInput.replace('**', '^').replace('Math.sqrt(', '√(');
-        }
+    <section class="section-padding corners">
+        <div class="grid-3">
+            <div>
+                <h3 style="margin-bottom:1.5rem; color:var(--primary)">🎓 Students' Corner</h3>
+                <div class="article-item">
+                    <img src="https://images.unsplash.com/photo-1518770660439-4636190af475?w=400" class="article-thumb">
+                    <div>
+                        <h4>Digital Impact</h4>
+                        <p style="font-size:0.85rem">How technology changes our learning...</p>
+                    </div>
+                </div>
+                <div class="article-item">
+                    <img src="https://images.unsplash.com/photo-1461360370896-922624d12aa1?w=400" class="article-thumb">
+                    <div>
+                        <h4>Heritage</h4>
+                        <p style="font-size:0.85rem">Preserving our cultural history...</p>
+                    </div>
+                </div>
+            </div>
+            <div>
+                <h3 style="margin-bottom:1.5rem; color:var(--primary)">📚 Teachers' Corner</h3>
+                <div class="article-item">
+                    <img src="https://images.unsplash.com/photo-1503676260728-1c00da094a0b?w=400" class="article-thumb">
+                    <div>
+                        <h4>E-Learning</h4>
+                        <p style="font-size:0.85rem">The transition to digital classrooms...</p>
+                    </div>
+                </div>
+            </div>
+            <div>
+                <h3 style="margin-bottom:1.5rem; color:var(--primary)">📩 Resources</h3>
+                <p>Download our latest manuals and project templates.</p>
+                <br>
+                <a href="#" class="btn" style="padding:0.6rem 1.5rem; font-size:0.9rem">Download PDF</a>
+            </div>
+        </div>
+    </section>
 
-        function allClear() {
-            currentInput = "";
-            resDisplay.innerText = "0";
-            histDisplay.innerText = "";
-        }
+    <footer class="footer" id="contact">
+        <div class="footer-grid">
+            <div>
+                <h4>Himal Academy</h4>
+                <p>Empowering students to achieve excellence since 1998. Join our journey towards a brighter future.</p>
+            </div>
+            <div>
+                <h4>Contact Us</h4>
+                <p>📍 Kathmandu, Nepal</p>
+                <p>📞 +977-1-0000000</p>
+                <p>📧 info@himalacademy.edu.np</p>
+            </div>
+            <div>
+                <h4>Quick Links</h4>
+                <p>> Admissions</p>
+                <p>> Examination Results</p>
+                <p>> Career</p>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            &copy; 2026 Himal Academy. All Rights Reserved. Designed for Excellence.
+        </div>
+    </footer>
+</div>
 
-        function calculate() {
-            try {
-                // Professional evaluation
-                let expression = currentInput;
-                // Auto-close square root brackets if user forgot
-                if (expression.includes('Math.sqrt(') && !expression.includes(')')) expression += ')';
-                
-                let result = eval(expression);
-                histDisplay.innerText = resDisplay.innerText + " =";
-                
-                // Handle decimals nicely
-                resDisplay.innerText = Number.isInteger(result) ? result : result.toFixed(4);
-                currentInput = resDisplay.innerText;
-            } catch (e) {
-                resDisplay.innerText = "Error";
-                setTimeout(allClear, 1500);
-            }
-        }
-
-        // Add keyboard support for professional feel
-        document.addEventListener('keydown', (e) => {
-            if (e.key >= 0 && e.key <= 9) append(e.key);
-            if (e.key === '+') append('+');
-            if (e.key === '-') append('-');
-            if (e.key === '*') append('*');
-            if (e.key === '/') append('/');
-            if (e.key === 'Enter') calculate();
-            if (e.key === 'Escape') allClear();
+<script>
+    // Smooth scroll for navigation links
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener('click', function (e) {
+            e.preventDefault();
+            document.querySelector(this.getAttribute('href')).scrollIntoView({
+                behavior: 'smooth'
+            });
         });
-    </script>
+    });
+</script>
+
 </body>
 </html>
